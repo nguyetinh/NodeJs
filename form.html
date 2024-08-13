@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/sign-in-up.css">
+</head>
+<body>
+    <a href="index.html" style="padding-right: 610px;"><button style="border-radius: 5px 20px ;">Quay lại</button></a>
+    <div class="container" id="container">
+        <div class="form-container sign-up-container">
+            <form action="#">
+                <h1>Tạo tài khoản</h1>
+                <input type="text" placeholder="Họ và tên" id="username" />
+                <input type="text" placeholder="Số điện thoại" id="sdt">
+                <input type="email" placeholder="Email" id="email"/>
+                <input type="password" placeholder="Mật khẩu" id="password"/>
+                <input type="password" placeholder="Nhập lại mật khẩu" id="repassword"/>
+                <button id="button">Đăng ký</button>
+            </form>
+        </div>
+        <div class="form-container sign-in-container">
+            <form action="#">
+                <h1>Đăng nhập</h1>
+                <input type="email" placeholder="Email" id="emailSigIn" />
+                <input type="password" placeholder="Password" id="passwordSigIn"/>
+                <a href="#">Quên mật khẩu?</a>
+                <button id="buttonSigIn">Đăng nhập</button>
+            </form>
+        </div>
+        <div class="overlay-container">
+            <div class="overlay">
+                <div class="overlay-panel overlay-left">
+                    <h1>Chào bạn!</h1>
+                    <p>Nhập thông tin cá nhân của bạn và bắt đầu hành trình với chúng tôi</p>
+                    <button class="ghost" id="signIn">Đăng nhập</button>
+                </div>
+                <div class="overlay-panel overlay-right">
+                    <h1>Chào mừng trở lại!</h1>
+                    <p>Để duy trì kết nối với chúng tôi vui lòng đăng nhập bằng thông tin cá nhân của bạn</p>
+                    <button class="ghost" id="signUp">Đăng ký</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const signUpButton = document.getElementById('signUp');
+        const signInButton = document.getElementById('signIn');
+        const container = document.getElementById('container');
+
+        signUpButton.addEventListener('click', () => {
+            container.classList.add('right-panel-active');
+        });
+
+        signInButton.addEventListener('click', () => {
+            container.classList.remove('right-panel-active');
+        });
+    </script>
+    <script>
+        const email = document.querySelector('#email');
+        const username = document.querySelector('#username');
+        const sdt = document.querySelector('#sdt');
+        const password = document.querySelector('#password');
+        const repassword = document.querySelector('#repassword');
+        const button = document.querySelector('#button');
+        button.addEventListener('click', () => {
+            if (email.value === '' || username.value === '' || sdt.value === '' || password.value === '' ||
+                repassword.value === '') {
+                alert('Vui lòng nhập đầy đủ thông tin');
+                event.preventDefault();
+                return;
+            }
+            if (password.value !== repassword.value) {
+                alert('Mật khẩu không khớp');
+                event.preventDefault();
+                return;
+            }
+
+            fetch('http://localhost:3000/api/users/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email.value,
+                    username: username.value,
+                    password: password.value
+                })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => {
+                            throw {
+                                status: response.status, error:
+                                    err
+                            };
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data);
+                    alert('Đăng ký thành công');
+                })
+                .catch(error => {
+                    console.log(error);
+                    if (error.status === 409) {
+                        alert('Email đã tồn tại');
+                    } else {
+                        alert('Đăng ký thất bại');
+                    }
+                });
+        })
+    </script>
+
+<script>
+    const emailSigIn = document.querySelector('#emailSigIn');
+    const passwordSigIn = document.querySelector('#passwordSigIn');
+    const buttonSigIn = document.querySelector('#buttonSigIn');
+    buttonSigIn.addEventListener('click', () => {
+        if (emailSigIn.value === '' || passwordSigIn.value === '') {
+            alert('Vui lòng nhập đầy đủ thông tin');
+            return;
+        }
+        fetch('http://localhost:3000/api/users/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: emailSigIn.value,
+                password: passwordSigIn.value
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                alert('Đăng nhập thành công');
+                // Lưu token vào localStorage
+                localStorage.setItem('token', data.token);
+                console.log(localStorage.getItem('token'));
+            })
+            .catch(error => {
+                console.log(error);
+                alert('Đăng nhập thất bại');
+            });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div>
+        <input type="email" id="email" placeholder="email">
+        <input type="password" id="password" placeholder="Mật khẩu">
+        <button type="submit">Đăng nhập</button>
+    </div>
+    <script>
+        const email = document.querySelector('#email');
+        const password = document.querySelector('#password');
+        const button = document.querySelector('button');
+        button.addEventListener('click', () => {
+            if (email.value === '' || password.value === '') {
+                alert('Vui lòng nhập đầy đủ thông tin');
+                return;
+            }
+            fetch('http://localhost:3000/api/user/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email.value,
+                    password: password.value
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    alert('Đăng nhập thành công');
+                    // Lưu token vào localStorage
+                    localStorage.setItem('token', data.token);
+                    console.log(localStorage.getItem('token'));
+                })
+                .catch(error => {
+                    console.log(error);
+                    alert('Đăng nhập thất bại');
+                });
+        });
+    </script>
+</body>
+
+</html>
